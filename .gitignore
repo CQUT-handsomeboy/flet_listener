@@ -1,0 +1,7 @@
+test*
+
+.vscode/
+
+__pycache__/
+
+sample*

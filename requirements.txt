@@ -1,0 +1,4 @@
+flet
+pyaudio
+opencv-python
+numpy
