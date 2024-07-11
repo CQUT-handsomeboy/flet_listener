@@ -2,6 +2,7 @@ import flet as ft
 import base64
 import cv2
 import numpy as np
+import asyncio
 
 # from icecream import ic
 from threading import Thread
@@ -110,39 +111,63 @@ class RTSP_VideoPlayer(ft.UserControl):
         return decode_imb64
 
 
+card = lambda title, text: ft.Card(
+    content=ft.Container(
+        content=ft.Column(
+            [
+                ft.Text(
+                    title,
+                    size=25,
+                    weight=ft.FontWeight.W_500,
+                    font_family="MiSans",
+                ),
+                ft.Text(text, size=15, font_family="MiSans"),
+            ],scroll=ft.ScrollMode.HIDDEN
+        ),
+        width=400,
+        height=150,
+        padding=10,
+    ),
+)
+
+
 def main(page: ft.Page):
+    column = ft.Column(
+        [], scroll=ft.ScrollMode.ALWAYS, width=400, height=800, spacing=2
+    )
+
     section = ft.Container(
         margin=ft.margin.only(bottom=40),
         content=ft.Row(
             [
                 RTSP_VideoPlayer(),
-                ft.Card(
-                    content=ft.Container(
-                        bgcolor=ft.colors.WHITE24,
-                        padding=20,
-                        margin=20,
-                        border_radius=ft.border_radius.all(10),
-                        content=ft.Column(
-                            [
-                                # 示例控件
-                                ft.Text("text1"),
-                                ft.Text("text2"),
-                                ft.Text("text3"),
-                                ft.Text("text4"),
-                                ft.Text("text5"),
-                                ft.Text("text6"),
-                                ft.Text("text7"),
-                            ]
-                        ),
-                    ),
+                ft.Container(
+                    padding=20,
+                    margin=20,
+                    border_radius=ft.border_radius.all(10),
+                    content=column,
                 ),
             ],
             alignment=ft.MainAxisAlignment.CENTER,
         ),
     )
 
-    page.padding = 10
+    async def add_cards():
+        for i in range(10):
+            column.controls.append(
+                card(
+                    "棋王",
+                    "车开了一会儿，车厢开始平静下来。有水送过来，大家就掏出缸子要水。我旁边的人打了水，说：“谁的棋？收了放缸子。”他很可怜的样子，问：“下棋吗？”要放缸的人说：“反正没意思，来一盘吧。”他就很高兴，连忙码好棋子。对手说：“这横着算怎么回事儿？没法儿看。”他搓着手说：“凑合了，平常看棋的时候，棋盘不等于是横着的？你先走。”对手很老练地拿起棋子儿，嘴里叫着：“当头炮。”他跟着跳上马。对手马上把他的卒吃了，他也立刻用马吃了对方的炮。我看这种简单的开局没有大意思，又实在对象棋不感兴趣，就转了头。",
+                )
+            )
+            page.update()
+            await asyncio.sleep(3)
+
+    page.run_task(add_cards)
+
+    page.padding = 20
     page.theme_mode = ft.ThemeMode.DARK
+    page.window_full_screen = True
     page.add(
         section,
     )
@@ -154,4 +179,5 @@ if __name__ == "__main__":
     finally:
         cap.release()
         is_audio_playing = False
-        audio_play_thread.join()
+        if audio_play_thread.is_alive():
+            audio_play_thread.join()
