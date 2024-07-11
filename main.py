@@ -3,19 +3,20 @@ import base64
 import cv2
 import numpy as np
 import asyncio
+import json
+import os
+import zmq
 
-# from icecream import ic
+from icecream import ic
 from threading import Thread
 from time import sleep
 
 import subprocess
 import pyaudio
 
+from utils import *
 
 is_audio_playing = False
-
-rtsp_url = "rtsp://localhost:8554/mystream"
-cap = cv2.VideoCapture(rtsp_url)
 
 
 def play_audio():
@@ -122,11 +123,12 @@ card = lambda title, text: ft.Card(
                     font_family="MiSans",
                 ),
                 ft.Text(text, size=15, font_family="MiSans"),
-            ],scroll=ft.ScrollMode.HIDDEN
+            ],
+            scroll=ft.ScrollMode.HIDDEN,
         ),
         width=400,
-        height=150,
-        padding=10,
+        height=250,
+        padding=25,
     ),
 )
 
@@ -152,18 +154,25 @@ def main(page: ft.Page):
         ),
     )
 
-    async def add_cards():
-        for i in range(10):
+    def add_cards():
+        while True:
+            message = socket.recv()
+            m = message.decode("utf-8")
+            try:
+                c = json.loads(m)
+            except json.JSONDecodeError:
+                socket.send_string("error")
+                continue
+            socket.send_string("successfully")
             column.controls.append(
                 card(
-                    "棋王",
-                    "车开了一会儿，车厢开始平静下来。有水送过来，大家就掏出缸子要水。我旁边的人打了水，说：“谁的棋？收了放缸子。”他很可怜的样子，问：“下棋吗？”要放缸的人说：“反正没意思，来一盘吧。”他就很高兴，连忙码好棋子。对手说：“这横着算怎么回事儿？没法儿看。”他搓着手说：“凑合了，平常看棋的时候，棋盘不等于是横着的？你先走。”对手很老练地拿起棋子儿，嘴里叫着：“当头炮。”他跟着跳上马。对手马上把他的卒吃了，他也立刻用马吃了对方的炮。我看这种简单的开局没有大意思，又实在对象棋不感兴趣，就转了头。",
+                    c["title"],
+                    c["text"],
                 )
             )
             page.update()
-            await asyncio.sleep(3)
 
-    page.run_task(add_cards)
+    page.run_thread(add_cards)
 
     page.padding = 20
     page.theme_mode = ft.ThemeMode.DARK
@@ -173,10 +182,32 @@ def main(page: ft.Page):
     )
 
 
+def run_server():
+    server_process = subprocess.Popen(["python", "./run_server.py"], shell=True)
+    server_process.wait()
+
+
 if __name__ == "__main__":
+    # 加载配置文件
+    configs = ConfigLoader().configs
+    rtsp_url = configs["rtsp_url"]
+    zeromq_port = configs["zeromq_port"]
+
+    cap = cv2.VideoCapture(rtsp_url)
+
+    context = zmq.Context()
+    socket = context.socket(zmq.REP)
+    socket.bind(f"tcp://*:{zeromq_port}")
+
+    # 运行whisper_live的后端服务器
+    # server_proc = Process(target=run_server)
+    # server_proc.start()
+
     try:
         ft.app(main)
     finally:
+        app_running = False
+        socket.close()
         cap.release()
         is_audio_playing = False
         if audio_play_thread.is_alive():
