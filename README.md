@@ -1,4 +1,4 @@
-# :rofl: Welcome to Listener
+[![SVG Banners](https://svg-banners.vercel.app/api?type=origin&text1=Welcome%20to%20Listener&text2=😂%20CQUT_handsomeboy&width=800&height=400)](https://github.com/Akshay090/svg-banners)
 
 ![Static Badge](https://img.shields.io/badge/License-AGPL3-green) ![Static Badge](https://img.shields.io/badge/Language-Python-red) ![Static Badge](https://img.shields.io/badge/Library-Flet-blue) ![Static Badge](https://img.shields.io/badge/Author-CQUT_handsomeboy-black)
 
@@ -24,21 +24,18 @@ UI采用`flet`，消息队列`Zeromq`(`pyzmq`)收发卡片信息。
 
 ## `utils.py`
 
-`pycorrector`用于错别字纠正，`opencc`用于繁体字到简体字转换，`jieba`用于分词。
+工具函数，加载配置文件，判断文件是否存在。
+
+## `speech_recognition.py`
+
+- 使用Sherpa ONNX库创建语音识别器。
+- 通过FFMPEG处理音频流，将其转换为可识别的格式。
+- 循环读取音频数据，进行语音识别并输出结果，将会进一步进行分词处理和语音段落检测。
+
+## `participle_words.py`
+
+根据传入的mode参数不同，使用不同的分词模式对文本进行分词。返回一个生成器对象。支持的分词模式有："precise"（精准模式）、"paddle"（paddl模式）、"full"（全模式）、"search_engine"（搜索引擎模式）和"news"（新闻模式）。默认模式为"precise"。使用jieba库的cut或cut_for_search方法进行分词。
 
 ## `zmq_mock_client.py`
 
 ZeroMQ客户端，用于模拟提供卡片数据，在使用运用中，flet客户端，即`main.py`作为一个单独进程运行，而语音转录作为另一个单独进程运行，两者通过ZeroMQ消息队列通信。
-
-
-# Problems
-
-音频转录文字还没有解决，拟采用`whisper_live`，后端服务运行正常，client时好时坏，但直接运行音频文件而不是流式则一切正常。
-
-[whisper_live 参考链接](https://github.com/collabora/WhisperLive)
-
-现有另一解决方案`FunASR`，提供流式输入，但原生不提供RTSP。
-
-[FunASR 参考链接](https://github.com/modelscope/FunASR)
-
-还有诸多加钱解决方案，调用API，例如[百度](https://ai.baidu.com/ai-doc/SPEECH/qlcirqhz0)，[讯飞](https://www.xfyun.cn/doc/asr/rtasr/API.html)等等。
