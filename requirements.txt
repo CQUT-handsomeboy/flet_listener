@@ -1,29 +1,13 @@
-# UI
 flet
-
-# 音频流播放
 pyaudio
-
-#视频流播放
 opencv-python
-
-# 流式语音识别
 numpy
-whisper_live
-
-# 繁体转简体
-opencc
-
-# 错别字检测
+spacy
 pycorrector
 git+https://github.com/shibing624/pycorrector.git
 pandas
-transformers
-datasets
 accelerate
-
-# 消息队列
+paddlepaddle
 pyzmq
-
-# 调试
 icecream
+pydantic

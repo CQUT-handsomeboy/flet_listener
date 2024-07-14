@@ -1,4 +1,12 @@
 {
     "rtsp_url":"rtsp://localhost:8554/mystream",
-    "zeromq_port":5555
+    "rtmp_url":"rtmp://localhost:1935/mystream",
+    "zeromq_port":5555,
+    "hot_words_file":"",
+    "decoder":"./LFS/decoder-epoch-99-avg-1.onnx",
+    "encoder":"./LFS/encoder-epoch-99-avg-1.onnx",
+    "joiner":"./LFS/joiner-epoch-99-avg-1.onnx",
+    "tokens":"./LFS/tokens.txt",
+    "hotwords_file":"",
+    "tokenization_time":20
 }

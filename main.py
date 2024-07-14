@@ -2,12 +2,9 @@ import flet as ft
 import base64
 import cv2
 import numpy as np
-import asyncio
 import json
-import os
 import zmq
 
-from icecream import ic
 from threading import Thread
 from time import sleep
 
@@ -24,7 +21,7 @@ def play_audio():
     ff_cmd = [
         "ffmpeg",
         "-i",
-        rtsp_url,  # 请将此处的URL替换为实际的RTSP流地址
+        configs.rtsp_url,  # 请将此处的URL替换为实际的RTSP流地址
         "-acodec",
         "pcm_s16le",  # 使用pcm_s16le编码，这是pyaudio支持的格式之一
         "-f",
@@ -62,7 +59,6 @@ def play_audio():
     ffmpeg_process.terminate()
     ffmpeg_process.wait()
 
-
 audio_play_thread = Thread(target=play_audio)
 
 
@@ -91,7 +87,7 @@ class RTSP_VideoPlayer(ft.UserControl):
 
             # 错误以后执行的代码
             cap.release()
-            cap = cv2.VideoCapture(rtsp_url)
+            cap = cv2.VideoCapture(configs.rtsp_url)
             sleep(1)
 
     def build(self):
@@ -176,7 +172,7 @@ def main(page: ft.Page):
 
     page.padding = 20
     page.theme_mode = ft.ThemeMode.DARK
-    page.window_full_screen = True
+    page.window.full_screen = True
     page.add(
         section,
     )
@@ -189,19 +185,15 @@ def run_server():
 
 if __name__ == "__main__":
     # 加载配置文件
-    configs = ConfigLoader().configs
-    rtsp_url = configs["rtsp_url"]
-    zeromq_port = configs["zeromq_port"]
+    configs = ConfigLoader()
 
-    cap = cv2.VideoCapture(rtsp_url)
+    # 如果未运行流服务器就卡死在这里
+    # 如果运行了流服务器但未推流不会卡死
+    cap = cv2.VideoCapture(configs.rtsp_url)
 
     context = zmq.Context()
     socket = context.socket(zmq.REP)
-    socket.bind(f"tcp://*:{zeromq_port}")
-
-    # 运行whisper_live的后端服务器
-    # server_proc = Process(target=run_server)
-    # server_proc.start()
+    socket.bind(f"tcp://*:{configs.zeromq_port}")
 
     try:
         ft.app(main)
