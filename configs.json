@@ -1,7 +1,6 @@
 {
-    "rtsp_url":"rtsp://localhost:8554/mystream",
-    "rtmp_url":"rtmp://localhost:1935/mystream",
-    "zeromq_port":5555,
+    "rtsp_url":"rtmp://192.168.61.231:1935/live/test",
+    "rtmp_url":"rtmp://192.168.61.231:1935/live/test",
     "hot_words_file":"",
     "decoder":"./LFS/decoder-epoch-99-avg-1.onnx",
     "encoder":"./LFS/encoder-epoch-99-avg-1.onnx",
